@@ -1,9 +1,21 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const OverwatchApp());
+}
+
+// Optimisation CDN : cache mondial + redimensionnement à la volée pour zéro lag
+String buildImageUrl(String originalUrl, {int? width}) {
+  if (originalUrl.isEmpty) return '';
+  if (kIsWeb) {
+    final cleanUrl = originalUrl.replaceFirst(RegExp(r'^https?:\/\/'), '');
+    final resizeParam = width != null ? '&w=$width&q=80&output=webp' : '&q=85&output=webp';
+    return 'https://images.weserv.nl/?url=$cleanUrl$resizeParam';
+  }
+  return originalUrl;
 }
 
 class OverwatchApp extends StatelessWidget {
@@ -273,9 +285,23 @@ class _HeroCatalogScreenState extends State<HeroCatalogScreen> {
               child: Hero(
                 tag: hero.key,
                 child: Image.network(
-                  'https://corsproxy.io/?' + Uri.encodeComponent(hero.portrait),
+                  buildImageUrl(hero.portrait, width: 250),
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 40),
+                  cacheWidth: 250,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      color: const Color(0xFF181B22),
+                      child: const Center(
+                        child: SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF99E1A)),
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 40, color: Colors.white38),
                 ),
               ),
             ),
@@ -392,8 +418,9 @@ class _HeroDetailScreenState extends State<HeroDetailScreen> {
                           ),
                           child: ClipOval(
                             child: Image.network(
-                              'https://corsproxy.io/?' + Uri.encodeComponent(hero.portrait),
+                              buildImageUrl(hero.portrait, width: 300),
                               fit: BoxFit.cover,
+                              cacheWidth: 300,
                             ),
                           ),
                         ),
@@ -513,8 +540,9 @@ class _HeroDetailScreenState extends State<HeroDetailScreen> {
                             ),
                             child: ability.iconUrl.isNotEmpty
                                 ? Image.network(
-                                    'https://corsproxy.io/?' + Uri.encodeComponent(ability.iconUrl),
+                                    buildImageUrl(ability.iconUrl, width: 80),
                                     fit: BoxFit.contain,
+                                    cacheWidth: 80,
                                     errorBuilder: (_, __, ___) =>
                                         const Icon(Icons.flash_on, color: Color(0xFFF99E1A)),
                                   )
