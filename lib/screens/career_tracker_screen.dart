@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../models/player_profile.dart';
+import '../utils/player_api.dart';
+import '../widgets/player_rank_card.dart';
+
+/// Recherche d'un joueur et affichage de ses rangs competitifs.
 class CareerTrackerScreen extends StatefulWidget {
   const CareerTrackerScreen({super.key});
 
@@ -9,152 +13,207 @@ class CareerTrackerScreen extends StatefulWidget {
 }
 
 class _CareerTrackerScreenState extends State<CareerTrackerScreen> {
-  // Ton URL officielle enregistrée par défaut
-  final TextEditingController _urlCtrl = TextEditingController(
-    text: 'https://overwatch.blizzard.com/fr-fr/career/c656a986b26197a2a4a221a0d7|28365ca0931d6c9cd59291a45e13bb98/',
-  );
+  static const _accent = Color(0xFFF99E1A);
 
-  Future<void> _openOfficialCareer(String url) async {
-    final cleanUrl = url.trim();
-    if (cleanUrl.isEmpty) return;
+  final TextEditingController _controller = TextEditingController();
 
-    final uri = Uri.parse(cleanUrl.startsWith('http') ? cleanUrl : 'https://$cleanUrl');
-    await launchUrl(uri, mode: LaunchMode.externalApplication, webOnlyWindowName: '_blank');
+  List<PlayerSearchResult>? _results;
+  PlayerProfile? _profile;
+  bool _loading = false;
+  bool _profileUnavailable = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _search() async {
+    final name = _controller.text.trim();
+    if (name.isEmpty) return;
+
+    setState(() {
+      _loading = true;
+      _profile = null;
+      _profileUnavailable = false;
+    });
+
+    final results = await PlayerApi.search(name);
+    if (!mounted) return;
+    setState(() {
+      _results = results;
+      _loading = false;
+    });
+  }
+
+  Future<void> _openProfile(PlayerSearchResult player) async {
+    setState(() {
+      _loading = true;
+      _profile = null;
+      _profileUnavailable = false;
+    });
+
+    final profile = await PlayerApi.summary(player.playerId);
+    if (!mounted) return;
+    setState(() {
+      _profile = profile;
+      _profileUnavailable = profile == null;
+      _loading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0C0F16),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF080A0F),
-        elevation: 0,
-        title: Transform(
-          transform: Matrix4.skewX(-0.16),
-          child: const Text(
-            'CARRIÈRE OFFICIELLE BLIZZARD',
-            style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 18),
-          ),
+    return ColoredBox(
+      color: const Color(0xFF090D15),
+      child: SafeArea(
+        child: Column(
+          children: [
+            _searchBar(),
+            Expanded(child: _body()),
+          ],
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Carte principale style Battle.net
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF141822),
-                border: Border.all(color: const Color(0xFFF99E1A), width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFF99E1A).withAlpha(50),
-                    blurRadius: 18,
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        color: const Color(0xFF0C0F16),
-                        child: const Icon(Icons.shield, color: Color(0xFFF99E1A), size: 28),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Transform(
-                              transform: Matrix4.skewX(-0.16),
-                              child: const Text(
-                                'PROFIL DE JOUEUR VÉRIFIÉ',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.2,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            const Text(
-                              'Compte synchronisé PC & Xbox',
-                              style: TextStyle(color: Colors.white54, fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  const Text(
-                    'LIEN DE TA CARRIÈRE OVERWATCH 2 :',
-                    style: TextStyle(color: Color(0xFFF99E1A), fontSize: 11, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    color: const Color(0xFF0C0F16),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: TextField(
-                      controller: _urlCtrl,
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Colle ton lien de profil officiel Blizzard...',
-                        hintStyle: TextStyle(color: Colors.white24),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 46,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF99E1A),
-                        foregroundColor: Colors.black,
-                        shape: const BeveledRectangleBorder(),
-                      ),
-                      icon: const Icon(Icons.open_in_new, size: 18),
-                      label: const Text(
-                        'OUVRIR MA CARRIÈRE OFFICIELLE',
-                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 1.0),
-                      ),
-                      onPressed: () => _openOfficialCareer(_urlCtrl.text),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
+    );
+  }
 
-            // Note explicative Blizzard biseautée
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: const BoxDecoration(
-                color: Color(0xFF141822),
-                border: Border(left: BorderSide(color: Colors.white24, width: 4)),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'SYNCHRONISATION MULTI-PLATEFORME',
-                    style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w900, fontSize: 11),
+  Widget _searchBar() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Cherche un joueur par son pseudo BattleTag (sans le #).',
+            style: TextStyle(color: Colors.white54, fontSize: 12),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  onSubmitted: (_) => _search(),
+                  textInputAction: TextInputAction.search,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: 'Pseudo du joueur',
+                    hintStyle: const TextStyle(color: Colors.white38, fontSize: 13),
+                    prefixIcon: const Icon(Icons.search, color: Colors.white38, size: 20),
+                    filled: true,
+                    fillColor: const Color(0xFF141926),
+                    contentPadding: EdgeInsets.zero,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
-                  SizedBox(height: 6),
-                  Text(
-                    'Les profils liés à la fois sur PC et Xbox utilisent un identifiant chiffré unique Blizzard. En passant par la passerelle officielle, toutes tes stats (temps de jeu, héros fétiches, ratios) s\'affichent sans restriction d\'API.',
-                    style: TextStyle(color: Colors.white54, fontSize: 12, height: 1.4),
-                  ),
-                ],
+                ),
               ),
+              const SizedBox(width: 8),
+              SizedBox(
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _accent,
+                    foregroundColor: Colors.black,
+                    shape: const BeveledRectangleBorder(),
+                  ),
+                  onPressed: _loading ? null : _search,
+                  child: const Text('OK', style: TextStyle(fontWeight: FontWeight.w900)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _body() {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator(color: _accent));
+    }
+
+    if (_profileUnavailable) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'Profil inaccessible.\nIl est probablement configuré en privé '
+            'dans les options du jeu.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white54, fontSize: 13, height: 1.5),
+          ),
+        ),
+      );
+    }
+
+    final profile = _profile;
+    if (profile != null) {
+      return ListView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        children: [PlayerRankCard(profile: profile)],
+      );
+    }
+
+    final results = _results;
+    if (results == null) {
+      return _placeholder(
+        Icons.person_search,
+        'Entre un pseudo pour consulter les rangs d\'un joueur.',
+      );
+    }
+    if (results.isEmpty) {
+      return _placeholder(Icons.search_off, 'Aucun joueur trouvé pour ce pseudo.');
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      itemCount: results.length,
+      itemBuilder: (context, i) => _resultTile(results[i]),
+    );
+  }
+
+  Widget _resultTile(PlayerSearchResult player) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      color: const Color(0xFF141926),
+      child: ListTile(
+        leading: player.avatar == null
+            ? const Icon(Icons.person, color: Colors.white24)
+            : Image.network(
+                player.avatar!,
+                width: 40,
+                height: 40,
+                errorBuilder: (_, __, ___) => const Icon(Icons.person, color: Colors.white24),
+              ),
+        title: Text(
+          player.name,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14),
+        ),
+        subtitle: player.title == null || player.title!.isEmpty
+            ? null
+            : Text(player.title!, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+        trailing: const Icon(Icons.chevron_right, color: _accent),
+        onTap: () => _openProfile(player),
+      ),
+    );
+  }
+
+  Widget _placeholder(IconData icon, String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 56, color: Colors.white.withAlpha(25)),
+            const SizedBox(height: 14),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white38, fontSize: 13),
             ),
           ],
         ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Pages qui s'ouvrent par-dessus le hub plutot que comme onglet.
-enum DrawerPage { voiceLines, meta, quiz, randomPick, cinematics }
+enum DrawerPage { voiceLines, meta, quiz, randomPick, cinematics, career }
 
 /// Menu principal de l'application.
 ///
@@ -53,6 +53,13 @@ class BlizzardDrawer extends StatelessWidget {
               Icons.trending_up,
               'Méta & tier list',
               () => onOpenPage(DrawerPage.meta),
+              badge: 'NOUVEAU',
+            ),
+            _tile(
+              context,
+              Icons.military_tech,
+              'Profil joueur & rangs',
+              () => onOpenPage(DrawerPage.career),
               badge: 'NOUVEAU',
             ),
             _tile(context, Icons.inventory_2, 'Coffres & inventaire', () => onNavigate(3)),

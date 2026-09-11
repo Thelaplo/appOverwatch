@@ -23,46 +23,106 @@ class Cinematic {
 /// Les cinematiques se regardent directement dans l'application, via le
 /// lecteur YouTube officiel embarque.
 ///
-/// Chaque identifiant ci-dessous a ete verifie avec l'endpoint oembed de
-/// YouTube et provient de la chaine PlayOverwatch. Blizzard ne publie pas de
-/// flux video exploitable de son cote : passer par le lecteur officiel est la
-/// seule voie propre, et c'est l'usage prevu.
+/// Chaque identifiant a ete verifie un a un avec l'endpoint oembed de YouTube
+/// et provient d'une chaine officielle Blizzard : « Overwatch FR » pour les
+/// versions francaises, « PlayOverwatch » pour les deux courts non doubles.
+/// Blizzard ne publie pas de flux video exploitable de son cote : passer par
+/// le lecteur officiel est la voie propre, et c'est l'usage prevu.
+///
+/// Classees dans l'ordre de sortie.
 const List<Cinematic> kCinematics = [
   Cinematic(
-    title: 'DRAGONS',
+    title: 'LE RAPPEL',
+    subtitle: 'Winston',
+    description:
+        'Attaqué par Reaper dans son laboratoire abandonné, Winston décide de '
+        'réactiver le signal de rappel et de reformer Overwatch.',
+    youtubeId: 'oyE56xeprQA',
+  ),
+  Cinematic(
+    title: 'EN VIE',
+    subtitle: 'Tracer & Widowmaker',
+    description:
+        'Widowmaker exécute un contrat sur Tekhartha Mondatta à King\'s Row. '
+        'Tracer tente de l\'en empêcher, en vain.',
+    youtubeId: '2gRgcasVRyw',
+  ),
+  Cinematic(
+    title: 'DEUX DRAGONS',
     subtitle: 'Hanzo & Genji',
     description:
         'Hanzo revient au sanctuaire familial de Hanamura et y affronte le fantôme '
         'du frère qu\'il croit avoir tué.',
-    youtubeId: 'oJ09xdxzIJQ',
+    youtubeId: 'BcXvkvxA4pw',
   ),
   Cinematic(
-    title: 'HERO',
+    title: 'HÉROS',
     subtitle: 'Soldat : 76',
     description:
         'À Dorado, un justicier masqué s\'en prend au gang des Muertos et protège '
         'une enfant prise dans la fusillade.',
-    youtubeId: 'cPRRupAM4DI',
+    youtubeId: 'Lhdeme9Kd2s',
   ),
   Cinematic(
-    title: 'HONOR AND GLORY',
+    title: 'LE DERNIER BASTION',
+    subtitle: 'Bastion',
+    description:
+        'Réveillé après des décennies dans la forêt, un robot de guerre découvre '
+        'la nature — jusqu\'à ce que ses souvenirs de combat resurgissent.',
+    youtubeId: 'Uh--cnw1CxE',
+  ),
+  Cinematic(
+    title: 'INFILTRATION',
+    subtitle: 'Sombra, Reaper & Widowmaker',
+    description:
+        'Talon monte une opération contre Katya Volskaya. Sombra en profite pour '
+        'mener son propre jeu.',
+    youtubeId: '-IhWb0G18lk',
+  ),
+  Cinematic(
+    title: 'HONNEUR ET GLOIRE',
     subtitle: 'Reinhardt',
     description:
         'Reinhardt se remémore la bataille d\'Eichenwalde et le sacrifice de '
         'Balderich von Adler.',
-    youtubeId: 'sQfk5HykiEk',
+    youtubeId: 'LlAzoaudL9w',
   ),
   Cinematic(
-    title: 'RISE AND SHINE',
+    title: 'LE RÉVEIL',
     subtitle: 'Mei',
     description:
-        'Réveillée d\'une cryostase de neuf ans à la station Écopoint : Antarctique, '
-        'Mei découvre qu\'elle est la seule survivante.',
-    youtubeId: '8tjcm_kI0n0',
+        'Réveillée d\'une cryostase de neuf ans à l\'Écopoint : Antarctique, Mei '
+        'découvre qu\'elle est la seule survivante de l\'équipe.',
+    youtubeId: 'xFSYN6jkirk',
   ),
   Cinematic(
-    title: 'KIRIKO',
+    title: 'RETROUVAILLES',
+    subtitle: 'Cassidy & Ashe',
+    description:
+        'Une attaque de train dans le désert donne à Cassidy l\'occasion de régler '
+        'ses comptes avec ses anciens associés du gang Deadlock.',
+    youtubeId: 'GJfIcDYnMTU',
+  ),
+  Cinematic(
+    title: 'RÉPONDEZ À L\'APPEL',
+    subtitle: 'Overwatch',
+    description:
+        'L\'appel du rappel résonne : les anciens agents reprennent du service.',
+    youtubeId: 'ONj-m21GeqU',
+  ),
+  Cinematic(
+    title: 'L\'HEURE ZÉRO',
     subtitle: 'Overwatch 2',
+    description:
+        'Paris tombe sous l\'assaut des omniaques. Winston réunit une poignée '
+        'd\'agents pour répondre présent.',
+    youtubeId: 'pyS3vmnWTyU',
+  ),
+  // Les deux suivantes n'ont pas de doublage francais publie : on garde la
+  // version originale de la chaine PlayOverwatch.
+  Cinematic(
+    title: 'KIRIKO',
+    subtitle: 'Overwatch 2 · VO',
     description:
         'Kiriko protège Kanezaka et les siens face au clan Hashimoto, entre '
         'tradition familiale et esprit renard.',
@@ -70,10 +130,10 @@ const List<Cinematic> kCinematics = [
   ),
   Cinematic(
     title: 'THE WASTELANDER',
-    subtitle: 'Junkrat & Chopper',
+    subtitle: 'Chopper · VO',
     description:
         'Dans les terres désolées australiennes, une rencontre tourne mal pour '
-        'ceux qui croisent la route du duo.',
+        'ceux qui croisent la route du Fatras.',
     youtubeId: '8-nXN9ZMl8o',
   ),
 ];
