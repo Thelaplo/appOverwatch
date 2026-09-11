@@ -73,4 +73,7 @@ const List<HeroVoiceLine> kOfficialVoiceLines = [
   HeroVoiceLine(hero: 'REINHARDT', text: '« Vivre avec honneur ! »', freq: 220.00),
   HeroVoiceLine(hero: 'ANA', text: '« La justice a besoin de repos. »', freq: 440.00),
   HeroVoiceLine(hero: 'KIRIKO', text: '« Sur ma bicyclette ! »', freq: 659.25),
+  // Frequence tres aigue pour le chat a reaction, tres grave pour le tank samoan.
+  HeroVoiceLine(hero: 'JETPACK CAT', text: '« Miaou ! Soutien aérien en approche ! »', freq: 880.00),
+  HeroVoiceLine(hero: 'MAUGA', text: '« Chaos, chaos, chaos ! »', freq: 146.83),
 ];

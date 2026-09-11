@@ -62,7 +62,7 @@ class BlizzardDrawer extends StatelessWidget {
                   }, badge: 'NOUVEAU'),
                   _subTile('Boutique & Collabs', () {
                     Navigator.pop(context);
-                    onNavigate(4);
+                    onNavigate(5);
                   }, badge: 'HOT'),
                 ],
               ),

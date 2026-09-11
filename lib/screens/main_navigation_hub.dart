@@ -1,11 +1,12 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../widgets/blizzard_app_bar.dart';
 import '../widgets/blizzard_drawer.dart';
 import 'hero_catalog_screen.dart';
 import 'maps_screen.dart';
 import 'comps_screen.dart';
-import 'lootbox_screen.dart';
+import 'loot_hub_screen.dart';
 import 'skins_gallery_screen.dart';
+import 'shop_collab_screen.dart';
 
 class MainNavigationHub extends StatefulWidget {
   const MainNavigationHub({super.key});
@@ -18,12 +19,15 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
   int _currentIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // L'ordre doit rester aligne sur les items de la barre du bas et sur les
+  // index utilises par BlizzardDrawer.
   final List<Widget> _screens = const [
     HeroCatalogScreen(),
     MapsScreen(),
     CompsScreen(),
-    LootboxScreen(),
+    LootHubScreen(),
     SkinsGalleryScreen(),
+    ShopCollabScreen(),
   ];
 
   @override
@@ -39,8 +43,8 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
         backgroundColor: const Color(0xFF090D15),
         selectedItemColor: const Color(0xFFF99E1A),
         unselectedItemColor: Colors.white38,
-        selectedFontSize: 10,
-        unselectedFontSize: 9,
+        selectedFontSize: 9,
+        unselectedFontSize: 8,
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.people), label: 'HÉROS'),
@@ -48,6 +52,7 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
           BottomNavigationBarItem(icon: Icon(Icons.shield), label: 'COMPOS'),
           BottomNavigationBarItem(icon: Icon(Icons.inventory_2), label: 'BUTIN'),
           BottomNavigationBarItem(icon: Icon(Icons.style), label: 'SKINS'),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_bag), label: 'BOUTIQUE'),
         ],
       ),
     );
