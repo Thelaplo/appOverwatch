@@ -17,13 +17,26 @@ class BlizzardAppBar extends StatelessWidget implements PreferredSizeWidget {
         onPressed: onMenuTap,
       ),
       centerTitle: true,
-      title: Image.network(
-        'https://images.blz-contentstack.com/v3/assets/blt9c12f249ac15c7ec/blt6d55d28aa0743b17/633e0a29482813098319f359/overwatch-logo.png',
-        height: 28,
-        errorBuilder: (_, __, ___) => const Text(
-          'OVERWATCH',
-          style: TextStyle(color: Color(0xFF212529), fontWeight: FontWeight.w900, letterSpacing: 1.5, fontSize: 16),
-        ),
+      // Le logo distant renvoyait 422 : on affichait donc toujours le texte
+      // de repli. La marque est maintenant embarquee dans l'application.
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset('assets/icon/athena_mark.png', height: 30),
+          const SizedBox(width: 10),
+          Transform(
+            transform: Matrix4.skewX(-0.16),
+            child: const Text(
+              'ATHENA',
+              style: TextStyle(
+                color: Color(0xFF212529),
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2.5,
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ],
       ),
       actions: const [
         Padding(

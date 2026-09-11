@@ -82,7 +82,13 @@ class BlizzardDrawer extends StatelessWidget {
       onTap: onTap,
       title: Row(
         children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Color(0xFF141822))),
+          Flexible(
+            child: Text(
+              title,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Color(0xFF141822)),
+            ),
+          ),
           if (badge != null) ...[
             const SizedBox(width: 8),
             Container(
@@ -103,7 +109,15 @@ class BlizzardDrawer extends StatelessWidget {
       onTap: onTap,
       title: Row(
         children: [
-          Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF2B3345))),
+          // Flexible : « Statistiques des personnages » suivi de son badge
+          // debordait de la largeur du tiroir.
+          Flexible(
+            child: Text(
+              title,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF2B3345)),
+            ),
+          ),
           if (badge != null) ...[
             const SizedBox(width: 6),
             Container(

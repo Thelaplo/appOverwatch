@@ -168,6 +168,12 @@ CompAnalysis analyzeTeam(
   if (traits.contains(HeroTrait.antiHeal)) {
     notes.add(const CompNote('Capacité à couper les soins adverses', NoteKind.strength));
   }
+  if (traits.contains(HeroTrait.damageAmp)) {
+    notes.add(const CompNote(
+      'Amplification de dégâts : efficace contre les tanks sans barrière',
+      NoteKind.strength,
+    ));
+  }
   if (traits.contains(HeroTrait.antiAir)) {
     notes.add(const CompNote('Réponse aux cibles aériennes (visée instantanée)', NoteKind.strength));
   }
@@ -191,10 +197,23 @@ CompAnalysis analyzeTeam(
       NoteKind.warning,
     ));
   }
-  if (!traits.contains(HeroTrait.antiHeal) && selected.length >= 4) {
+  // Couper les soins et amplifier les degats resolvent le meme probleme :
+  // faire tomber une cible que l'equipe n'arrive pas a tuer. Une grenade
+  // biotique d'Ana ou une Discorde de Zenyatta suffisent l'une comme l'autre.
+  final canBreakThrough =
+      traits.contains(HeroTrait.antiHeal) || traits.contains(HeroTrait.damageAmp);
+
+  if (!canBreakThrough && selected.length >= 4) {
     notes.add(const CompNote(
-      'Pas d\'anti-soin : les compositions très soignées seront dures à tuer',
+      'Ni anti-soin ni amplification de dégâts : les cibles très soignées '
+      'resteront difficiles à faire tomber',
       NoteKind.warning,
+    ));
+  } else if (traits.contains(HeroTrait.antiHeal) && !traits.contains(HeroTrait.damageAmp)) {
+    notes.add(const CompNote(
+      'Anti-soin présent, mais une Discorde ou une amplification ajouterait '
+      'de la pression sur les tanks sans barrière',
+      NoteKind.tip,
     ));
   }
   if (!traits.contains(HeroTrait.protection) && tanks > 0) {

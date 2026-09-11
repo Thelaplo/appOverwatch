@@ -7,6 +7,11 @@ enum HeroTrait {
   /// Reduit ou annule les soins adverses.
   antiHeal,
 
+  /// Augmente les degats subis par une cible ou infliges par un allie.
+  /// Autre reponse que l'anti-soin au meme probleme : faire tomber une cible
+  /// trop resistante, typiquement un tank sans barriere.
+  damageAmp,
+
   /// Deploie une protection pour l'equipe (barriere, bouclier, mur).
   protection,
 
@@ -59,20 +64,20 @@ const Map<String, Set<HeroTrait>> kHeroTraits = {
   'torbjorn': {HeroTrait.shieldBreak},
   'junkrat': {HeroTrait.crowdControl},
   'pharah': {HeroTrait.crowdControl},
-  'sombra': {HeroTrait.crowdControl},
+  'sombra': {HeroTrait.crowdControl, HeroTrait.damageAmp},
   'hanzo': {HeroTrait.shieldBreak},
   'echo': {HeroTrait.antiAir},
 
   // --- Soutiens ---
-  'ana': {HeroTrait.antiHeal, HeroTrait.burstHeal, HeroTrait.crowdControl},
+  'ana': {HeroTrait.antiHeal, HeroTrait.burstHeal, HeroTrait.crowdControl, HeroTrait.damageAmp},
   'baptiste': {HeroTrait.immortality, HeroTrait.burstHeal, HeroTrait.antiAir},
   'kiriko': {HeroTrait.immortality, HeroTrait.burstHeal},
   'lucio': {HeroTrait.teamMobility, HeroTrait.crowdControl},
   'juno': {HeroTrait.teamMobility},
-  'mercy': {HeroTrait.teamMobility},
+  'mercy': {HeroTrait.teamMobility, HeroTrait.damageAmp},
   'brigitte': {HeroTrait.protection, HeroTrait.crowdControl},
   'lifeweaver': {HeroTrait.burstHeal},
-  'zenyatta': {HeroTrait.burstHeal},
+  'zenyatta': {HeroTrait.burstHeal, HeroTrait.damageAmp},
   'moira': {HeroTrait.burstHeal},
   'illari': {HeroTrait.burstHeal},
   'jetpack-cat': {HeroTrait.teamMobility},
