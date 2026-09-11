@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import '../models/hero.dart';
 import '../models/inventory.dart';
 import '../models/loot_drop.dart';
-import '../utils/image_helper.dart';
 
 class LootboxScreen extends StatefulWidget {
   /// Previent le hub qu'un tirage a modifie l'inventaire, pour que l'onglet
@@ -59,7 +58,9 @@ class _LootboxScreenState extends State<LootboxScreen> with SingleTickerProvider
     await _anim.forward(from: 0.0);
     if (!mounted) return;
 
-    final rolled = LootboxRoll.roll4Items(_heroes);
+    final rolled = await LootboxRoll.roll4Items(_heroes);
+    if (!mounted) return;
+
     final result = await InventoryStore.addAll(
       rolled.map((e) => e.toInventoryItem()).toList(),
     );
@@ -235,7 +236,7 @@ class _LootboxScreenState extends State<LootboxScreen> with SingleTickerProvider
                       fit: StackFit.expand,
                       children: [
                         Image.network(
-                          buildImageUrl(item.hero.portrait, width: 220),
+                          item.imageUrl,
                           fit: BoxFit.cover,
                           width: double.infinity,
                           errorBuilder: (_, __, ___) => const ColoredBox(

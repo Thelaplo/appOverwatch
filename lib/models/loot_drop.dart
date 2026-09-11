@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../utils/skin_api.dart';
 import 'hero.dart';
 import 'inventory.dart';
 import 'skin_catalog.dart';
@@ -22,6 +23,9 @@ class LootItem {
   final LootRarity rarity;
   final String skinName;
 
+  /// Image du skin issue du wiki, ou portrait du heros si le wiki n'a rien.
+  final String imageUrl;
+
   /// Renseigne apres l'enregistrement dans l'inventaire : un skin deja
   /// possede ne compte pas comme une nouveaute.
   final bool isNew;
@@ -30,6 +34,7 @@ class LootItem {
     required this.hero,
     required this.rarity,
     required this.skinName,
+    required this.imageUrl,
     this.isNew = true,
   });
 
@@ -37,6 +42,7 @@ class LootItem {
         hero: hero,
         rarity: rarity,
         skinName: skinName,
+        imageUrl: imageUrl,
         isNew: isNew ?? this.isNew,
       );
 
@@ -44,16 +50,21 @@ class LootItem {
         heroKey: hero.key,
         heroName: hero.name,
         skinName: skinName,
-        portrait: hero.portrait,
+        imageUrl: imageUrl,
         rarity: rarity,
         obtainedAt: DateTime.now(),
       );
 }
 
 class LootboxRoll {
-  static List<LootItem> roll4Items(List<HeroSummary> heroes) {
+  /// Tire quatre objets. Chaque heros tire est complete par un vrai skin
+  /// recupere sur le wiki ; si le wiki ne repond pas (ou ne connait pas ce
+  /// heros), on retombe sur un nom generique et le portrait officiel.
+  static Future<List<LootItem>> roll4Items(List<HeroSummary> heroes) async {
     final rand = Random();
-    return List.generate(4, (_) {
+    final items = <LootItem>[];
+
+    for (var i = 0; i < 4; i++) {
       final roll = rand.nextDouble();
       LootRarity rarity;
       if (roll < 0.08) {
@@ -65,12 +76,18 @@ class LootboxRoll {
       } else {
         rarity = LootRarity.common;
       }
+
       final hero = heroes[rand.nextInt(heroes.length)];
-      return LootItem(
+      final skin = await SkinApi.randomSkinFor(hero.key, rand);
+
+      items.add(LootItem(
         hero: hero,
         rarity: rarity,
-        skinName: randomSkinName(rarity, rand),
-      );
-    });
+        skinName: skin?.name ?? randomSkinName(rarity, rand),
+        imageUrl: skin?.imageUrl ?? hero.portrait,
+      ));
+    }
+
+    return items;
   }
 }

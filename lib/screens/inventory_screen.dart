@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../models/inventory.dart';
 import '../models/loot_drop.dart';
-import '../utils/image_helper.dart';
 
 /// Inventaire des skins obtenus dans les coffres.
 ///
@@ -229,13 +228,13 @@ class InventoryScreenState extends State<InventoryScreen> {
             ),
           ),
           Expanded(
-            child: item.portrait.isEmpty
+            child: item.imageUrl.isEmpty
                 ? const ColoredBox(
                     color: Color(0xFF1B2233),
                     child: Center(child: Icon(Icons.person, color: Colors.white24, size: 36)),
                   )
                 : Image.network(
-                    buildImageUrl(item.portrait, width: 220),
+                    item.imageUrl,
                     fit: BoxFit.cover,
                     width: double.infinity,
                     errorBuilder: (_, __, ___) => const ColoredBox(

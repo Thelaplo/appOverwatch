@@ -9,7 +9,9 @@ class InventoryItem {
   final String heroKey;
   final String heroName;
   final String skinName;
-  final String portrait;
+
+  /// Image du skin issue du wiki, ou portrait du heros en repli.
+  final String imageUrl;
   final LootRarity rarity;
   final DateTime obtainedAt;
 
@@ -17,7 +19,7 @@ class InventoryItem {
     required this.heroKey,
     required this.heroName,
     required this.skinName,
-    required this.portrait,
+    required this.imageUrl,
     required this.rarity,
     required this.obtainedAt,
   });
@@ -30,7 +32,7 @@ class InventoryItem {
         'heroKey': heroKey,
         'heroName': heroName,
         'skinName': skinName,
-        'portrait': portrait,
+        'imageUrl': imageUrl,
         'rarity': rarity.name,
         'obtainedAt': obtainedAt.toIso8601String(),
       };
@@ -40,7 +42,9 @@ class InventoryItem {
       heroKey: json['heroKey'] as String? ?? '',
       heroName: json['heroName'] as String? ?? 'Inconnu',
       skinName: json['skinName'] as String? ?? 'Classique',
-      portrait: json['portrait'] as String? ?? '',
+      // `portrait` est l'ancien nom du champ, conserve pour les inventaires
+      // enregistres avant l'arrivee des images de skins.
+      imageUrl: json['imageUrl'] as String? ?? json['portrait'] as String? ?? '',
       rarity: LootRarity.values.firstWhere(
         (r) => r.name == json['rarity'],
         orElse: () => LootRarity.common,
