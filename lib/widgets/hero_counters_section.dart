@@ -9,6 +9,7 @@ class HeroCountersSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = getMatchup(heroKey);
+    if (data == null) return const SizedBox.shrink();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),

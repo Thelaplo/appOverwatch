@@ -40,10 +40,9 @@ const Map<String, HeroMatchupData> kHeroMatchups = {
   ),
 };
 
-HeroMatchupData getMatchup(String heroKey) {
-  return kHeroMatchups[heroKey.toLowerCase()] ??
-      const HeroMatchupData(
-        strongAgainst: ['Héros isolés', 'Cibles sans mobilité'],
-        weakAgainst: ['Tirs de barrage', 'Contrôles de foule (CC)'],
-      );
-}
+/// Matchups d'un heros, ou null s'ils n'ont pas encore ete renseignes.
+///
+/// Mieux vaut ne rien afficher que des generalites : l'ancienne version
+/// renvoyait « Heros isoles » et « Tirs de barrage » pour tout heros inconnu,
+/// ce qui donnait l'illusion d'une information sans en etre une.
+HeroMatchupData? getMatchup(String heroKey) => kHeroMatchups[heroKey.toLowerCase()];

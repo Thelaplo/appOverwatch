@@ -8,6 +8,9 @@ import 'loot_hub_screen.dart';
 import 'skins_gallery_screen.dart';
 import 'shop_collab_screen.dart';
 import 'voice_lines_screen.dart';
+import 'meta_screen.dart';
+import 'voice_quiz_screen.dart';
+import 'random_pick_screen.dart';
 
 class MainNavigationHub extends StatefulWidget {
   const MainNavigationHub({super.key});
@@ -31,10 +34,17 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
     ShopCollabScreen(),
   ];
 
-  /// Les repliques s'ouvrent en page a part plutot que dans la pile d'onglets :
+  /// Ces ecrans s'ouvrent en page a part plutot que dans la pile d'onglets :
   /// la barre du bas est pleine, et un index sans onglet correspondant ferait
   /// echouer BottomNavigationBar.
-  void _openVoiceLines() {
+  void _openPage(DrawerPage page) {
+    final (title, body) = switch (page) {
+      DrawerPage.voiceLines => ('RÉPLIQUES AUDIO', const VoiceLinesScreen()),
+      DrawerPage.meta => ('MÉTA & TIER LIST', const MetaScreen()),
+      DrawerPage.quiz => ('QUIZ DES RÉPLIQUES', const VoiceQuizScreen()),
+      DrawerPage.randomPick => ('JE JOUE QUOI ?', const RandomPickScreen()),
+    };
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => Scaffold(
@@ -44,13 +54,13 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
             elevation: 0,
             title: Transform(
               transform: Matrix4.skewX(-0.16),
-              child: const Text(
-                'RÉPLIQUES AUDIO',
-                style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 16),
+              child: Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 16),
               ),
             ),
           ),
-          body: const VoiceLinesScreen(),
+          body: body,
         ),
       ),
     );
@@ -63,7 +73,7 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
       appBar: BlizzardAppBar(onMenuTap: () => _scaffoldKey.currentState?.openDrawer()),
       drawer: BlizzardDrawer(
         onNavigate: (index) => setState(() => _currentIndex = index),
-        onOpenVoiceLines: _openVoiceLines,
+        onOpenPage: _openPage,
       ),
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: BottomNavigationBar(

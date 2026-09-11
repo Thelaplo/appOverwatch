@@ -1,145 +1,199 @@
 import 'package:flutter/material.dart';
 
+/// Pages qui s'ouvrent par-dessus le hub plutot que comme onglet.
+enum DrawerPage { voiceLines, meta, quiz, randomPick }
+
+/// Menu principal de l'application.
+///
+/// L'ancienne version reprenait l'habillage du site Blizzard (fond blanc,
+/// bouclier, rubriques « Saison » ou « Actualites ») dont la moitie ne menait
+/// nulle part. Il suit maintenant l'identite sombre d'Athena et n'expose que
+/// des entrees fonctionnelles.
 class BlizzardDrawer extends StatelessWidget {
+  /// Bascule vers un onglet de la barre du bas.
   final Function(int) onNavigate;
 
-  /// Les repliques audio s'ouvrent en page a part, pas via la pile d'onglets.
-  final VoidCallback onOpenVoiceLines;
+  /// Ouvre une page hors onglets.
+  final Function(DrawerPage) onOpenPage;
 
   const BlizzardDrawer({
     super.key,
     required this.onNavigate,
-    required this.onOpenVoiceLines,
+    required this.onOpenPage,
   });
+
+  static const _accent = Color(0xFFF99E1A);
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF0C101A),
       child: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.zero,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
-                const Text('BLIZZARD', style: TextStyle(color: Color(0xFF0074E0), fontWeight: FontWeight.w900, fontSize: 18, letterSpacing: 1.2)),
-                const SizedBox(width: 40),
-              ],
+            _header(context),
+            _sectionLabel('CONSULTER'),
+            _tile(context, Icons.people, 'Héros', () => onNavigate(0)),
+            _tile(context, Icons.map, 'Cartes', () => onNavigate(1)),
+            _tile(context, Icons.shield, 'Compositions', () => onNavigate(2)),
+            _tile(context, Icons.style, 'Galerie des skins', () => onNavigate(4)),
+            _tile(context, Icons.shopping_bag, 'Boutique & collabs', () => onNavigate(5), badge: 'HOT'),
+            _divider(),
+            _sectionLabel('GAMEPLAY'),
+            _tile(
+              context,
+              Icons.trending_up,
+              'Méta & tier list',
+              () => onOpenPage(DrawerPage.meta),
+              badge: 'NOUVEAU',
             ),
-            const SizedBox(height: 12),
-            Center(
-              child: Image.network(
-                'https://images.blz-contentstack.com/v3/assets/blt9c12f249ac15c7ec/blt6d55d28aa0743b17/633e0a29482813098319f359/overwatch-logo.png',
-                height: 48,
-                errorBuilder: (_, __, ___) => const Icon(Icons.shield, size: 40, color: Color(0xFFF99E1A)),
-              ),
+            _tile(context, Icons.inventory_2, 'Coffres & inventaire', () => onNavigate(3)),
+            _divider(),
+            _sectionLabel('POUR LE PLAISIR'),
+            _tile(
+              context,
+              Icons.graphic_eq,
+              'Répliques audio',
+              () => onOpenPage(DrawerPage.voiceLines),
             ),
-            const SizedBox(height: 16),
-            // Barre de recherche joueurs
-            Container(
-              decoration: BoxDecoration(color: const Color(0xFFF2F4F7), borderRadius: BorderRadius.circular(4)),
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: const TextField(
-                decoration: InputDecoration(
-                  icon: Icon(Icons.search, size: 18, color: Colors.black54),
-                  hintText: 'Profils des joueurs',
-                  hintStyle: TextStyle(fontSize: 13, color: Colors.black38),
-                  border: InputBorder.none,
-                ),
-              ),
+            _tile(
+              context,
+              Icons.quiz,
+              'Quiz : devine le héros',
+              () => onOpenPage(DrawerPage.quiz),
+              badge: 'NOUVEAU',
             ),
-            const SizedBox(height: 18),
-            _menuTile('Informations sur le jeu', hasSub: true),
-            _menuTile('Personnages', badge: 'NOUVEAU', isOpen: true, onTap: () {
-              Navigator.pop(context);
-              onNavigate(0);
-            }),
-            Padding(
-              padding: const EdgeInsets.only(left: 14),
-              child: Column(
-                children: [
-                  _subTile('Galerie des personnages', () {
-                    Navigator.pop(context);
-                    onNavigate(0);
-                  }),
-                  _subTile('Statistiques des personnages', () {
-                    Navigator.pop(context);
-                    onNavigate(3);
-                  }, badge: 'NOUVEAU'),
-                  _subTile('Boutique & Collabs', () {
-                    Navigator.pop(context);
-                    onNavigate(5);
-                  }, badge: 'HOT'),
-                  _subTile('Répliques audio', () {
-                    Navigator.pop(context);
-                    onOpenVoiceLines();
-                  }, badge: 'NOUVEAU'),
-                ],
-              ),
+            _tile(
+              context,
+              Icons.casino,
+              'Je joue quoi ?',
+              () => onOpenPage(DrawerPage.randomPick),
+              badge: 'NOUVEAU',
             ),
-            _menuTile('Saison'),
-            _menuTile('Actualités'),
-            _menuTile('Communauté', hasSub: true),
+            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
 
-  Widget _menuTile(String title, {String? badge, bool isOpen = false, bool hasSub = false, VoidCallback? onTap}) {
+  Widget _header(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 18, 12, 20),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A2438), Color(0xFF0C101A)],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Align(
+            alignment: Alignment.topRight,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white38),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          Row(
+            children: [
+              Image.asset('assets/icon/athena_mark.png', height: 52),
+              const SizedBox(width: 14),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Transform(
+                    transform: Matrix4.skewX(-0.16),
+                    child: const Text(
+                      'ATHENA',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 3,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    'COMPAGNON OVERWATCH 2',
+                    style: TextStyle(color: _accent, fontSize: 9, letterSpacing: 1.6, fontWeight: FontWeight.w900),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sectionLabel(String label) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white30,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.6,
+          ),
+        ),
+      );
+
+  Widget _divider() => const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Divider(color: Colors.white12, height: 1),
+      );
+
+  Widget _tile(
+    BuildContext context,
+    IconData icon,
+    String title,
+    VoidCallback onTap, {
+    String? badge,
+  }) {
     return ListTile(
       dense: true,
-      onTap: onTap,
+      leading: Icon(icon, color: _accent, size: 20),
       title: Row(
         children: [
           Flexible(
             child: Text(
               title,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Color(0xFF141822)),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           if (badge != null) ...[
             const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(color: const Color(0xFF00A2FF), borderRadius: BorderRadius.circular(3)),
-              child: Text(badge, style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900)),
+              color: badge == 'HOT' ? const Color(0xFFD500F9) : const Color(0xFF00A2FF),
+              child: Text(
+                badge,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 8,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
             ),
           ],
         ],
       ),
-      trailing: hasSub ? const Icon(Icons.keyboard_arrow_down, size: 18) : (isOpen ? const Icon(Icons.keyboard_arrow_up, size: 18) : null),
-    );
-  }
-
-  Widget _subTile(String title, VoidCallback onTap, {String? badge}) {
-    return ListTile(
-      dense: true,
-      onTap: onTap,
-      title: Row(
-        children: [
-          // Flexible : « Statistiques des personnages » suivi de son badge
-          // debordait de la largeur du tiroir.
-          Flexible(
-            child: Text(
-              title,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF2B3345)),
-            ),
-          ),
-          if (badge != null) ...[
-            const SizedBox(width: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-              decoration: BoxDecoration(color: const Color(0xFF00A2FF), borderRadius: BorderRadius.circular(3)),
-              child: Text(badge, style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
-            ),
-          ],
-        ],
-      ),
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
+      },
     );
   }
 }

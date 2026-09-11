@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import '../models/hero.dart';
 import '../utils/image_helper.dart';
 import '../widgets/hero_perks_section.dart';
+import '../widgets/hero_counters_section.dart';
 import '../widgets/blizzard_background_video.dart';
 
 class HeroDetailScreen extends StatefulWidget {
@@ -218,6 +219,7 @@ class _HeroDetailScreenState extends State<HeroDetailScreen> {
 
                 // Section BONUS
                 HeroPerksSection(heroKey: widget.heroKey),
+                HeroCountersSection(heroKey: widget.heroKey),
               ],
             ),
           );
