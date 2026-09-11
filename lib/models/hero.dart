@@ -4,12 +4,18 @@ class HeroSummary {
   final String key;
   final String name;
   final String role;
+
+  /// Sous-role officiel Blizzard : initiator, bruiser, stalwart, flanker,
+  /// recon, sharpshooter, specialist, medic, survivor, tactician.
+  /// Sert de base a l'analyse de composition.
+  final String subrole;
   final String portrait;
 
   HeroSummary({
     required this.key,
     required this.name,
     required this.role,
+    required this.subrole,
     required this.portrait,
   });
 
@@ -18,6 +24,7 @@ class HeroSummary {
       key: json['key'] ?? '',
       name: json['name'] ?? 'Inconnu',
       role: json['role'] ?? 'unknown',
+      subrole: json['subrole'] ?? '',
       portrait: json['portrait'] ?? '',
     );
   }

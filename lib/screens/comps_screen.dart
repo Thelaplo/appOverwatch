@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../models/hero.dart';
 import '../utils/comp_analyzer.dart';
+import '../utils/hero_stats_api.dart';
 import '../utils/image_helper.dart';
 
 class CompsScreen extends StatefulWidget {
@@ -38,11 +39,25 @@ class _CompsScreenState extends State<CompsScreen> with SingleTickerProviderStat
     },
   ];
 
+  /// Points de vie reels des heros selectionnes, charges a la demande.
+  Map<String, HeroHitpoints> _hitpoints = {};
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _heroesFuture = _fetchHeroes();
+  }
+
+  /// Recupere les points de vie des heros de l'escouade. Tant qu'ils ne sont
+  /// pas la, l'analyse affiche une estimation par role.
+  Future<void> _loadHitpoints() async {
+    final keys = _team.whereType<HeroSummary>().map((h) => h.key).toList();
+    if (keys.isEmpty) return;
+
+    final loaded = await HeroStatsApi.fetchAll(keys);
+    if (!mounted) return;
+    setState(() => _hitpoints = loaded);
   }
 
   Future<List<HeroSummary>> _fetchHeroes() async {
@@ -83,6 +98,7 @@ class _CompsScreenState extends State<CompsScreen> with SingleTickerProviderStat
                   return InkWell(
                     onTap: () {
                       setState(() => _team[slotIndex] = h);
+                      _loadHitpoints();
                       Navigator.pop(ctx);
                     },
                     child: Container(
@@ -186,7 +202,7 @@ class _CompsScreenState extends State<CompsScreen> with SingleTickerProviderStat
                   ),
                 );
               }
-              final analysis = analyzeTeam(_team);
+              final analysis = analyzeTeam(_team, hitpoints: _hitpoints);
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -203,20 +219,27 @@ class _CompsScreenState extends State<CompsScreen> with SingleTickerProviderStat
                       ],
                     ),
                     const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      color: const Color(0xFF141822),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('POINTS DE VIE ESTIMÉS', style: TextStyle(color: Color(0xFFF99E1A), fontWeight: FontWeight.bold, fontSize: 12)),
-                          Text('${analysis.totalHp} PV', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white)),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...analysis.strengths.map((s) => _diag(s, const Color(0xFF00E676))),
-                    ...analysis.warnings.map((w) => _diag(w, const Color(0xFFFF5252))),
+                    if (!analysis.isEmpty) ...[
+                      _styleBanner(analysis),
+                      const SizedBox(height: 12),
+                      _hitpointsPanel(analysis),
+                      const SizedBox(height: 12),
+                      _rolePanel(analysis),
+                      const SizedBox(height: 12),
+                      if (analysis.ultCombos.isNotEmpty) ...[
+                        _sectionTitle('COMBOS D\'ULTIMES'),
+                        ...analysis.ultCombos.map(
+                          (c) => _diag(c, const Color(0xFFD500F9), Icons.auto_awesome),
+                        ),
+                        const SizedBox(height: 6),
+                      ],
+                    ],
+                    ..._notesSection(analysis, NoteKind.strength, 'POINTS FORTS',
+                        const Color(0xFF00E676), Icons.check_circle_outline),
+                    ..._notesSection(analysis, NoteKind.warning, 'FAIBLESSES',
+                        const Color(0xFFFF5252), Icons.warning_amber_rounded),
+                    ..._notesSection(analysis, NoteKind.tip, 'À AJUSTER',
+                        const Color(0xFFF99E1A), Icons.lightbulb_outline),
                   ],
                 ),
               );
@@ -253,10 +276,189 @@ class _CompsScreenState extends State<CompsScreen> with SingleTickerProviderStat
     );
   }
 
-  Widget _diag(String text, Color color) => Container(
+  Widget _diag(String text, Color color, [IconData? icon]) => Container(
         margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(color: const Color(0xFF141822), border: Border(left: BorderSide(color: color, width: 3))),
-        child: Text(text, style: const TextStyle(fontSize: 12, color: Colors.white70)),
+        decoration: BoxDecoration(
+          color: const Color(0xFF141822),
+          border: Border(left: BorderSide(color: color, width: 3)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, color: color, size: 16),
+              const SizedBox(width: 8),
+            ],
+            Expanded(
+              child: Text(text, style: const TextStyle(fontSize: 12, color: Colors.white70)),
+            ),
+          ],
+        ),
       );
+
+  Widget _sectionTitle(String label) => Padding(
+        padding: const EdgeInsets.only(bottom: 6, top: 4),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white38,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.2,
+          ),
+        ),
+      );
+
+  /// Bandeau indiquant le style de jeu identifie.
+  Widget _styleBanner(CompAnalysis analysis) {
+    const colors = {
+      CompStyle.dive: Color(0xFF00E5FF),
+      CompStyle.brawl: Color(0xFFFF5252),
+      CompStyle.poke: Color(0xFFF99E1A),
+      CompStyle.hybrid: Color(0xFF9E9E9E),
+      CompStyle.unknown: Color(0xFF9E9E9E),
+    };
+    final color = colors[analysis.style] ?? Colors.grey;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF141822),
+        border: Border(left: BorderSide(color: color, width: 4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'STYLE : ${analysis.style.label}',
+                style: TextStyle(color: color, fontWeight: FontWeight.w900, fontSize: 14),
+              ),
+              const Spacer(),
+              if (analysis.style != CompStyle.unknown && analysis.style != CompStyle.hybrid)
+                Text(
+                  '${(analysis.styleConfidence * 100).round()} %',
+                  style: TextStyle(color: color, fontWeight: FontWeight.w900, fontSize: 12),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            analysis.style.description,
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Points de vie cumules, avec le detail armure / boucliers.
+  Widget _hitpointsPanel(CompAnalysis analysis) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      color: const Color(0xFF141822),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                analysis.hpIsExact ? 'POINTS DE VIE' : 'POINTS DE VIE (ESTIMÉS)',
+                style: const TextStyle(
+                  color: Color(0xFFF99E1A),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+              Text(
+                '${analysis.totalHp} PV',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          if (analysis.armor > 0 || analysis.shields > 0) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                if (analysis.armor > 0)
+                  Text(
+                    '${analysis.armor} armure',
+                    style: const TextStyle(color: Color(0xFFFFB300), fontSize: 11),
+                  ),
+                if (analysis.armor > 0 && analysis.shields > 0)
+                  const Text('  •  ', style: TextStyle(color: Colors.white24, fontSize: 11)),
+                if (analysis.shields > 0)
+                  Text(
+                    '${analysis.shields} boucliers',
+                    style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 11),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Rappel de la repartition des roles, comparee au 1-2-2 de la file par role.
+  Widget _rolePanel(CompAnalysis analysis) {
+    Widget cell(String label, int count, int expected) {
+      final ok = count == expected;
+      return Expanded(
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '$count / $expected',
+              style: TextStyle(
+                color: ok ? const Color(0xFF00E676) : const Color(0xFFFF5252),
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      color: const Color(0xFF141822),
+      child: Row(
+        children: [
+          cell('TANK', analysis.tanks, 1),
+          cell('DÉGÂTS', analysis.damages, 2),
+          cell('SOUTIEN', analysis.supports, 2),
+        ],
+      ),
+    );
+  }
+
+  /// Une section de notes (forces, faiblesses, conseils), masquee si vide.
+  List<Widget> _notesSection(
+    CompAnalysis analysis,
+    NoteKind kind,
+    String title,
+    Color color,
+    IconData icon,
+  ) {
+    final notes = analysis.notes.where((n) => n.kind == kind).toList();
+    if (notes.isEmpty) return const [];
+
+    return [
+      _sectionTitle(title),
+      ...notes.map((n) => _diag(n.text, color, icon)),
+      const SizedBox(height: 6),
+    ];
+  }
 }
