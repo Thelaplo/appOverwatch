@@ -11,6 +11,7 @@ import 'voice_lines_screen.dart';
 import 'meta_screen.dart';
 import 'voice_quiz_screen.dart';
 import 'random_pick_screen.dart';
+import 'cinematics_screen.dart';
 
 class MainNavigationHub extends StatefulWidget {
   const MainNavigationHub({super.key});
@@ -43,6 +44,7 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
       DrawerPage.meta => ('MÉTA & TIER LIST', const MetaScreen()),
       DrawerPage.quiz => ('QUIZ DES RÉPLIQUES', const VoiceQuizScreen()),
       DrawerPage.randomPick => ('JE JOUE QUOI ?', const RandomPickScreen()),
+      DrawerPage.cinematics => ('CINÉMATIQUES', const CinematicsScreen()),
     };
 
     Navigator.of(context).push(

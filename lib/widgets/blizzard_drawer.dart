@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Pages qui s'ouvrent par-dessus le hub plutot que comme onglet.
-enum DrawerPage { voiceLines, meta, quiz, randomPick }
+enum DrawerPage { voiceLines, meta, quiz, randomPick, cinematics }
 
 /// Menu principal de l'application.
 ///
@@ -39,6 +39,13 @@ class BlizzardDrawer extends StatelessWidget {
             _tile(context, Icons.shield, 'Compositions', () => onNavigate(2)),
             _tile(context, Icons.style, 'Galerie des skins', () => onNavigate(4)),
             _tile(context, Icons.shopping_bag, 'Boutique & collabs', () => onNavigate(5), badge: 'HOT'),
+            _tile(
+              context,
+              Icons.movie,
+              'Cinématiques',
+              () => onOpenPage(DrawerPage.cinematics),
+              badge: 'NOUVEAU',
+            ),
             _divider(),
             _sectionLabel('GAMEPLAY'),
             _tile(

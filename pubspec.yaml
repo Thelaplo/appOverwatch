@@ -38,8 +38,8 @@ dependencies:
   url_launcher: ^6.3.2
   shared_preferences: ^2.5.5
   video_player: ^2.14.0
-  flutter_tts: ^4.2.5
   audioplayers: ^6.8.1
+  youtube_player_iframe: ^6.0.2
 
 dev_dependencies:
   flutter_test:
