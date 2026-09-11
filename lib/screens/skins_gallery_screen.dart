@@ -1,10 +1,6 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 import '../utils/skin_api.dart';
-import '../utils/voice_clip_player.dart';
-import '../utils/voice_line_api.dart';
 
 /// Un skin du wiki, rattache au heros auquel il appartient.
 class _GallerySkin {
@@ -37,33 +33,14 @@ class _SkinsGalleryScreenState extends State<SkinsGalleryScreen> {
   /// Nombre de skins retenus par heros, pour garder la grille lisible.
   static const int _skinsPerHero = 8;
 
-  /// Nombre de repliques proposees par heros.
-  static const int _voiceLinesPerHero = 3;
 
   String _activeFilter = 'TOUS';
-  String? _playingLine;
   List<_GallerySkin>? _skins;
-  List<WikiVoiceLine> _voiceLines = [];
 
   @override
   void initState() {
     super.initState();
     _loadSkins();
-    _loadVoiceLines();
-  }
-
-  Future<void> _loadVoiceLines() async {
-    final random = Random();
-    final collected = <WikiVoiceLine>[];
-
-    for (final entry in _featuredHeroes.entries) {
-      collected.addAll(
-        await VoiceLineApi.sample(entry.key, entry.value, _voiceLinesPerHero, random),
-      );
-    }
-
-    if (!mounted) return;
-    setState(() => _voiceLines = collected);
   }
 
   Future<void> _loadSkins() async {
@@ -78,19 +55,6 @@ class _SkinsGalleryScreenState extends State<SkinsGalleryScreen> {
 
     if (!mounted) return;
     setState(() => _skins = collected);
-  }
-
-  Future<void> _playVoiceSound(WikiVoiceLine line) async {
-    setState(() => _playingLine = line.audioUrl);
-
-    await VoiceClipPlayer.play(line.audioUrl);
-
-    // Les extraits du jeu sont courts ; on retire la mise en avant peu apres.
-    Future.delayed(const Duration(milliseconds: 1800), () {
-      if (mounted && _playingLine == line.audioUrl) {
-        setState(() => _playingLine = null);
-      }
-    });
   }
 
   @override
@@ -130,19 +94,6 @@ class _SkinsGalleryScreenState extends State<SkinsGalleryScreen> {
                   ),
                   const SizedBox(height: 14),
                   _buildHeroFilters(),
-                  const SizedBox(height: 18),
-                  const Text(
-                    'RÉPLIQUES AUDIO (CLIQUE POUR ÉCOUTER)',
-                    style: TextStyle(
-                      color: Color(0xFFF99E1A),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildVoiceLines(),
-                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -198,101 +149,6 @@ class _SkinsGalleryScreenState extends State<SkinsGalleryScreen> {
             ),
           );
         }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildVoiceLines() {
-    if (_voiceLines.isEmpty) {
-      return const SizedBox(
-        height: 64,
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            'Chargement des répliques officielles...',
-            style: TextStyle(color: Colors.white38, fontSize: 12),
-          ),
-        ),
-      );
-    }
-
-    return SizedBox(
-      height: 64,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _voiceLines.length,
-        itemBuilder: (ctx, i) {
-          final v = _voiceLines[i];
-          final isPlaying = _playingLine == v.audioUrl;
-
-          return InkWell(
-            onTap: () => _playVoiceSound(v),
-            child: Container(
-              margin: const EdgeInsets.only(right: 10),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: isPlaying ? const Color(0xFF1F2838) : const Color(0xFF141926),
-                border: Border.all(
-                  color: isPlaying ? const Color(0xFFF99E1A) : Colors.white12,
-                  width: isPlaying ? 2 : 1,
-                ),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    isPlaying ? Icons.graphic_eq : Icons.volume_up,
-                    color: const Color(0xFFF99E1A),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            v.heroLabel,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          if (v.isUltimate) ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                              color: const Color(0xFFD500F9),
-                              child: const Text(
-                                'ULTI',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 200),
-                        child: Text(
-                          v.text,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white70, fontSize: 11),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
       ),
     );
   }

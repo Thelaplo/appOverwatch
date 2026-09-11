@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 
 class BlizzardDrawer extends StatelessWidget {
   final Function(int) onNavigate;
-  const BlizzardDrawer({super.key, required this.onNavigate});
+
+  /// Les repliques audio s'ouvrent en page a part, pas via la pile d'onglets.
+  final VoidCallback onOpenVoiceLines;
+
+  const BlizzardDrawer({
+    super.key,
+    required this.onNavigate,
+    required this.onOpenVoiceLines,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +72,10 @@ class BlizzardDrawer extends StatelessWidget {
                     Navigator.pop(context);
                     onNavigate(5);
                   }, badge: 'HOT'),
+                  _subTile('Répliques audio', () {
+                    Navigator.pop(context);
+                    onOpenVoiceLines();
+                  }, badge: 'NOUVEAU'),
                 ],
               ),
             ),

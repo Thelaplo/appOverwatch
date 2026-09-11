@@ -7,6 +7,7 @@ import 'comps_screen.dart';
 import 'loot_hub_screen.dart';
 import 'skins_gallery_screen.dart';
 import 'shop_collab_screen.dart';
+import 'voice_lines_screen.dart';
 
 class MainNavigationHub extends StatefulWidget {
   const MainNavigationHub({super.key});
@@ -30,12 +31,40 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
     ShopCollabScreen(),
   ];
 
+  /// Les repliques s'ouvrent en page a part plutot que dans la pile d'onglets :
+  /// la barre du bas est pleine, et un index sans onglet correspondant ferait
+  /// echouer BottomNavigationBar.
+  void _openVoiceLines() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: const Color(0xFF090D15),
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF04060A),
+            elevation: 0,
+            title: Transform(
+              transform: Matrix4.skewX(-0.16),
+              child: const Text(
+                'RÉPLIQUES AUDIO',
+                style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 16),
+              ),
+            ),
+          ),
+          body: const VoiceLinesScreen(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       appBar: BlizzardAppBar(onMenuTap: () => _scaffoldKey.currentState?.openDrawer()),
-      drawer: BlizzardDrawer(onNavigate: (index) => setState(() => _currentIndex = index)),
+      drawer: BlizzardDrawer(
+        onNavigate: (index) => setState(() => _currentIndex = index),
+        onOpenVoiceLines: _openVoiceLines,
+      ),
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
