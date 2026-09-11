@@ -48,6 +48,18 @@ class _HeroDetailScreenState extends State<HeroDetailScreen> {
       body: FutureBuilder<HeroDetail>(
         future: _detailFuture,
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'Impossible de charger ce héros.\nVérifie ta connexion.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white54, fontSize: 13),
+                ),
+              ),
+            );
+          }
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator(color: Color(0xFFF99E1A)));
           final hero = snapshot.data!;
           final activeAbility = hero.abilities.isNotEmpty ? hero.abilities[_selectedAbilityIndex] : null;

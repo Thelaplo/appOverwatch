@@ -46,12 +46,17 @@ class _CompsScreenState extends State<CompsScreen> with SingleTickerProviderStat
   }
 
   Future<List<HeroSummary>> _fetchHeroes() async {
-    final res = await http.get(Uri.parse('https://overfast-api.tekrop.fr/heroes?locale=fr-fr'));
-    if (res.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
-      return data.map((j) => HeroSummary.fromJson(j)).toList();
+    try {
+      final res = await http.get(Uri.parse('https://overfast-api.tekrop.fr/heroes?locale=fr-fr'));
+      if (res.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
+        return data.map((j) => HeroSummary.fromJson(j)).toList();
+      }
+    } catch (_) {
+      // Hors ligne : on renvoie une liste vide plutot que de laisser le
+      // FutureBuilder sur un chargement infini.
     }
-    throw Exception('Erreur API');
+    return [];
   }
 
   void _openHeroPicker(int slotIndex, String targetRole, List<HeroSummary> heroes) {
@@ -169,6 +174,18 @@ class _CompsScreenState extends State<CompsScreen> with SingleTickerProviderStat
             builder: (context, snapshot) {
               if (!snapshot.hasData) return const Center(child: CircularProgressIndicator(color: Color(0xFFF99E1A)));
               final heroes = snapshot.data!;
+              if (heroes.isEmpty) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Text(
+                      'Impossible de charger les héros.\nVérifie ta connexion.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white54, fontSize: 13),
+                    ),
+                  ),
+                );
+              }
               final analysis = analyzeTeam(_team);
 
               return SingleChildScrollView(

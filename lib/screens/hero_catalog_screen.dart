@@ -24,12 +24,16 @@ class _HeroCatalogScreenState extends State<HeroCatalogScreen> {
   }
 
   Future<List<HeroSummary>> _fetchHeroes() async {
-    final res = await http.get(Uri.parse('https://overfast-api.tekrop.fr/heroes?locale=fr-fr'));
-    if (res.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
-      return data.map((json) => HeroSummary.fromJson(json)).toList();
+    try {
+      final res = await http.get(Uri.parse('https://overfast-api.tekrop.fr/heroes?locale=fr-fr'));
+      if (res.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
+        return data.map((json) => HeroSummary.fromJson(json)).toList();
+      }
+    } catch (_) {
+      // Hors ligne : liste vide plutot qu'un chargement infini.
     }
-    throw Exception('Chargement échoué');
+    return [];
   }
 
   @override
@@ -69,6 +73,18 @@ class _HeroCatalogScreenState extends State<HeroCatalogScreen> {
               future: _heroesFuture,
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator(color: Color(0xFFF99E1A)));
+                if (snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text(
+                        'Impossible de charger les héros.\nVérifie ta connexion.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white54, fontSize: 13),
+                      ),
+                    ),
+                  );
+                }
                 final heroes = snapshot.data!.where((h) {
                   if (_selectedRole == 'TANK') return h.role == 'tank';
                   if (_selectedRole == 'DÉGÂTS') return h.role == 'damage';
